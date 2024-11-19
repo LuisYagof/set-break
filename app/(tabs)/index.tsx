@@ -1,74 +1,168 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import {
+  Pressable,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "@/constants/Colors";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+interface Timer {
+  id: string;
+  seconds: number;
+  name: string;
+}
 
-export default function HomeScreen() {
+export default function TimerList() {
+  const [timers, setTimers] = useState<Timer[]>([]);
+  const [seconds, setSeconds] = useState("");
+  const [name, setName] = useState("");
+
+  async function addTimer(seconds: number, name: string) {
+    const newTimer = {
+      id: Date.now().toString(),
+      seconds,
+      name,
+    };
+    const updatedTimers = [...timers, newTimer];
+    setTimers(updatedTimers);
+    await AsyncStorage.setItem("timers", JSON.stringify(updatedTimers));
+  }
+
+  async function removeTimer(item: Timer) {
+    const updatedTimers = timers.filter((timer) => timer.id !== item.id);
+    setTimers(updatedTimers);
+    await AsyncStorage.setItem("timers", JSON.stringify(updatedTimers));
+  }
+
+  function handleAddTimer() {
+    const secondsNum = parseInt(seconds);
+    if (isNaN(secondsNum) || secondsNum <= 0) {
+      Alert.alert("Invalid Input", "Please enter a valid number of seconds");
+      return;
+    }
+    if (!name.trim()) {
+      Alert.alert("Invalid Input", "Please enter a timer name");
+      return;
+    }
+    addTimer(secondsNum, name);
+    setSeconds("");
+    setName("");
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <ThemedView style={styles.viewWrapper}>
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.inputContainer}>
+          <TextInput
+            style={[
+              { color: Colors[useColorScheme().colorScheme].text },
+              styles.input,
+            ]}
+            placeholder="Timer Name"
+            placeholderTextColor="#aaa"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={[
+              { color: Colors[useColorScheme().colorScheme].text },
+              styles.input,
+            ]}
+            placeholder="Seconds"
+            placeholderTextColor="#aaa"
+            keyboardType="numeric"
+            value={seconds}
+            onChangeText={setSeconds}
+          />
+          <TouchableOpacity style={styles.addButton} onPress={handleAddTimer}>
+            <ThemedText style={styles.buttonText}>Add Timer</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+
+        <FlatList
+          data={timers}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.timerItem}
+              onPress={() =>
+                router.push({
+                  pathname: "/(tabs)/countdown",
+                  params: { timer: JSON.stringify(item) }, // TODO: Fix this params
+                })
+              }
+            >
+              <ThemedText style={styles.timerName}>{item.name}</ThemedText>
+              <ThemedText style={styles.timerSeconds}>
+                {item.seconds} seconds
+              </ThemedText>
+              <Pressable
+                style={styles.iconBin}
+                onPress={() => removeTimer(item)}
+              >
+                <IconSymbol size={28} name="bin" color={"#c40707"} />
+              </Pressable>
+            </TouchableOpacity>
+          )}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  viewWrapper: {
+    paddingTop: "15%",
+    paddingLeft: "1%",
+    paddingRight: "1%",
+    height: "100%",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  container: {
+    padding: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  inputContainer: {
+    marginBottom: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  addButton: {
+    backgroundColor: Colors.light.tint,
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  timerItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  timerName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  timerSeconds: {},
+  iconBin: {
+    position: "absolute",
+    left: "100%",
+    top: "50%",
+    zIndex: 0,
   },
 });
