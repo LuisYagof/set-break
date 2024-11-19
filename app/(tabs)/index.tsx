@@ -14,6 +14,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
+import { Collapsible } from "@/components/Collapsible";
 
 interface Timer {
   id: string;
@@ -61,6 +62,7 @@ export default function TimerList() {
   return (
     <ThemedView style={styles.viewWrapper}>
       <ThemedView style={styles.container}>
+        {/* <Collapsible title="Create new timer"> */}
         <ThemedView style={styles.inputContainer}>
           <TextInput
             style={[
@@ -87,6 +89,7 @@ export default function TimerList() {
             <ThemedText style={styles.buttonText}>Add Timer</ThemedText>
           </TouchableOpacity>
         </ThemedView>
+        {/* </Collapsible> */}
 
         <FlatList
           data={timers}
@@ -96,12 +99,16 @@ export default function TimerList() {
               style={styles.timerItem}
               onPress={() =>
                 router.push({
-                  pathname: "/(tabs)/countdown",
-                  params: { timer: JSON.stringify(item) }, // TODO: Fix this params
+                  pathname: "/countdown",
+                  params: { timer: JSON.stringify(item) },
                 })
               }
             >
-              <ThemedText style={styles.timerName}>{item.name}</ThemedText>
+              <ThemedText
+                style={[{ fontFamily: "SpaceMono" }, styles.timerName]}
+              >
+                {item.name}
+              </ThemedText>
               <ThemedText style={styles.timerSeconds}>
                 {item.seconds} seconds
               </ThemedText>

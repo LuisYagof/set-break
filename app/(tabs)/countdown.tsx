@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
+import { useLocalSearchParams } from "expo-router";
 import { Audio } from "expo-av";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -11,12 +12,11 @@ interface Timer {
   name: string;
 }
 
-export default function Countdown({ route, navigation }: any) {
-  let timer: Timer;
-  timer =
-    route && route.params
-      ? route.params.timer
-      : { name: "Anonymous", seconds: 55 };
+export default function Countdown() {
+  const params = useLocalSearchParams();
+  const timer: Timer = params.timer
+    ? JSON.parse(params.timer as string)
+    : { name: "Anonymous timer", seconds: 55 };
   const [volume, setVolume] = useState(0.5);
   const [timeLeft, setTimeLeft] = useState(timer.seconds);
   const [isRunning, setIsRunning] = useState(false);
@@ -55,7 +55,7 @@ export default function Countdown({ route, navigation }: any) {
   async function playAlarm() {
     try {
       const { sound: newSound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/alarm.mp3"),
+        require("@/assets/sounds/alarm.mp3"),
         { volume }
       );
       setSound(newSound);
@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
+    fontFamily: "SpaceMono",
   },
   timeLeft: {
     marginBottom: 40,
