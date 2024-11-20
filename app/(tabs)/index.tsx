@@ -15,12 +15,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
 import { Collapsible } from "@/components/Collapsible";
-
-interface Timer {
-  id: string;
-  seconds: number;
-  name: string;
-}
+import { type Timer } from "@/types/common.types";
 
 export default function TimerList() {
   const [timers, setTimers] = useState<Timer[]>([]);
@@ -128,7 +123,6 @@ export default function TimerList() {
 
 const styles = StyleSheet.create({
   viewWrapper: {
-    paddingTop: "15%",
     paddingLeft: "1%",
     paddingRight: "1%",
     height: "100%",

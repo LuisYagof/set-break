@@ -5,12 +5,7 @@ import { useLocalSearchParams } from "expo-router";
 import { Audio } from "expo-av";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-
-interface Timer {
-  id: string;
-  seconds: number;
-  name: string;
-}
+import { type Timer } from "@/types/common.types";
 
 export default function Countdown() {
   const params = useLocalSearchParams();
@@ -119,7 +114,7 @@ export default function Countdown() {
           <Slider
             style={styles.slider}
             value={volume}
-            // onValueChange={setVolume}
+            // onValueChange={setVolume} // TODO: This breaks
             onSlidingComplete={setVolume}
             minimumValue={0}
             maximumValue={1}
@@ -133,7 +128,6 @@ export default function Countdown() {
 
 const styles = StyleSheet.create({
   viewWrapper: {
-    paddingTop: "15%",
     paddingLeft: "1%",
     paddingRight: "1%",
     justifyContent: "center",
@@ -142,7 +136,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 10,
   },
   timerName: {
     fontSize: 24,
